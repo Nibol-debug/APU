@@ -1,0 +1,2391 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SIMDP - Sistem Informasi Manajemen Data Pegawai</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+  <style>
+    :root {
+      --primary-color: #1e3a5f;
+      --secondary-color: #2c5282;
+      --accent-color: #3182ce;
+      --success-color: #38a169;
+      --warning-color: #d69e2e;
+      --danger-color: #e53e3e;
+      --bg-light: #f7fafc;
+    }
+    
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: var(--bg-light);
+    }
+    
+    .navbar-brand {
+      font-weight: 700;
+      color: white !important;
+    }
+    
+    .sidebar {
+      min-height: calc(100vh - 56px);
+      background: linear-gradient(180deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+    }
+    
+    .sidebar .nav-link {
+      color: rgba(255,255,255,0.8);
+      padding: 12px 20px;
+      border-radius: 8px;
+      margin: 4px 10px;
+      transition: all 0.3s;
+    }
+    
+    .sidebar .nav-link:hover,
+    .sidebar .nav-link.active {
+      background: rgba(255,255,255,0.15);
+      color: white;
+    }
+    
+    .sidebar .nav-link i {
+      width: 24px;
+      margin-right: 10px;
+    }
+    
+    .card-stat {
+      border: none;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      transition: transform 0.2s;
+    }
+    
+    .card-stat:hover {
+      transform: translateY(-2px);
+    }
+    
+    .card-stat .card-body {
+      padding: 20px;
+    }
+    
+    .card-stat .stat-icon {
+      width: 50px;
+      height: 50px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+    }
+    
+    .stat-icon.blue { background: rgba(49,130,206,0.15); color: var(--accent-color); }
+    .stat-icon.green { background: rgba(56,161,105,0.15); color: var(--success-color); }
+    .stat-icon.yellow { background: rgba(214,158,46,0.15); color: var(--warning-color); }
+    .stat-icon.red { background: rgba(229,62,62,0.15); color: var(--danger-color); }
+    .stat-icon.purple { background: rgba(128,90,213,0.15); color: #805ad5; }
+    
+    .stat-number {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--primary-color);
+    }
+    
+    .stat-label {
+      font-size: 13px;
+      color: #718096;
+      margin-top: 4px;
+    }
+    
+    .badge-tetap { background: var(--success-color); }
+    .badge-kontrak { background: var(--warning-color); }
+    .badge-relawan { background: #718096; }
+    
+    .table-container {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      padding: 20px;
+    }
+    
+    .btn-primary {
+      background: var(--accent-color);
+      border-color: var(--accent-color);
+    }
+    
+    .btn-primary:hover {
+      background: var(--secondary-color);
+      border-color: var(--secondary-color);
+    }
+    
+    .modal-header {
+      background: var(--primary-color);
+      color: white;
+    }
+    
+    .modal-header .btn-close {
+      filter: brightness(0) invert(1);
+    }
+    
+    .page-section {
+      display: none;
+    }
+    
+    .page-section.active {
+      display: block;
+    }
+    
+    .timeline {
+      position: relative;
+      padding-left: 30px;
+    }
+    
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 10px;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: var(--accent-color);
+    }
+    
+    .timeline-item {
+      position: relative;
+      margin-bottom: 20px;
+      padding: 15px;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    }
+    
+    .timeline-item::before {
+      content: '';
+      position: absolute;
+      left: -24px;
+      top: 20px;
+      width: 12px;
+      height: 12px;
+      background: var(--accent-color);
+      border-radius: 50%;
+      border: 2px solid white;
+    }
+    
+    .timeline-item.current::before {
+      background: var(--success-color);
+      box-shadow: 0 0 0 4px rgba(56,161,105,0.2);
+    }
+    
+    .loading-spinner {
+      display: none;
+      text-align: center;
+      padding: 40px;
+    }
+    
+    .loading-spinner.show {
+      display: block;
+    }
+    
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: #718096;
+    }
+    
+    .empty-state i {
+      font-size: 48px;
+      margin-bottom: 15px;
+      opacity: 0.5;
+    }
+    
+    .search-box {
+      position: relative;
+    }
+    
+    .search-box input {
+      padding-left: 40px;
+      border-radius: 8px;
+    }
+    
+    .search-box i {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #a0aec0;
+    }
+    
+    .filter-chip {
+      display: inline-block;
+      padding: 6px 12px;
+      background: #edf2f7;
+      border-radius: 20px;
+      font-size: 13px;
+      margin: 4px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .filter-chip:hover,
+    .filter-chip.active {
+      background: var(--accent-color);
+      color: white;
+    }
+    
+    .employee-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--accent-color);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+    }
+    
+    .login-container {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+    }
+    
+    .login-card {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+      padding: 40px;
+      max-width: 400px;
+      width: 100%;
+      text-align: center;
+    }
+    
+    .login-logo {
+      width: 80px;
+      height: 80px;
+      margin: 0 auto 20px;
+      background: var(--primary-color);
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 32px;
+    }
+    
+    .btn-google {
+      background: white;
+      border: 2px solid #e2e8f0;
+      color: #4a5568;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+    
+    .btn-google:hover {
+      border-color: var(--accent-color);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    .detail-header {
+      background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+      color: white;
+      padding: 30px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+    }
+    
+    .detail-avatar {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      font-weight: 600;
+    }
+    
+    .nav-tabs .nav-link {
+      border: none;
+      color: #718096;
+      padding: 12px 20px;
+    }
+    
+    .nav-tabs .nav-link.active {
+      color: var(--accent-color);
+      border-bottom: 2px solid var(--accent-color);
+      background: transparent;
+    }
+    
+    .info-label {
+      font-size: 12px;
+      color: #a0aec0;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+    
+    .info-value {
+      font-size: 15px;
+      color: var(--primary-color);
+      font-weight: 500;
+    }
+    
+    @media (max-width: 768px) {
+      .sidebar {
+        position: fixed;
+        z-index: 1000;
+        transform: translateX(-100%);
+        transition: transform 0.3s;
+      }
+      
+      .sidebar.show {
+        transform: translateX(0);
+      }
+      
+      .stat-number {
+        font-size: 22px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Login Page -->
+  <div id="loginPage" class="login-container">
+    <div class="login-card">
+      <div class="login-logo">
+        <i class="bi bi-building"></i>
+      </div>
+      <h4 class="mb-2">SIMDP</h4>
+      <p class="text-muted mb-4">Sistem Informasi Manajemen Data Pegawai<br>LAZWaf Al Azhar</p>
+      <button class="btn btn-google w-100 mb-3" onclick="loginWithGoogle()">
+        <i class="bi bi-google me-2"></i>Masuk dengan Google
+      </button>
+      <p class="text-muted small" id="loginMessage"></p>
+    </div>
+  </div>
+
+  <!-- Main Application -->
+  <div id="appContainer" style="display: none;">
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark" style="background: var(--primary-color);">
+      <div class="container-fluid">
+        <button class="btn btn-link text-white d-lg-none" onclick="toggleSidebar()">
+          <i class="bi bi-list fs-4"></i>
+        </button>
+        <a class="navbar-brand" href="#">
+          <i class="bi bi-building me-2"></i>SIMDP
+        </a>
+        <div class="d-flex align-items-center ms-auto">
+          <span class="text-white me-3 d-none d-md-inline" id="userEmail"></span>
+          <span class="badge bg-light text-dark me-3" id="userRole"></span>
+          <button class="btn btn-outline-light btn-sm" onclick="logout()">
+            <i class="bi bi-box-arrow-right me-1"></i>Keluar
+          </button>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container-fluid">
+      <div class="row">
+        <!-- Sidebar -->
+        <nav class="col-lg-2 sidebar py-3" id="sidebar">
+          <ul class="nav flex-column">
+            <li class="nav-item">
+              <a class="nav-link active" href="#" onclick="showPage('dashboard')">
+                <i class="bi bi-speedometer2"></i>Dashboard
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#" onclick="showPage('employees')">
+                <i class="bi bi-people"></i>Data Pegawai
+              </a>
+            </li>
+            <li class="nav-item" id="menuUsers" style="display: none;">
+              <a class="nav-link" href="#" onclick="showPage('users')">
+                <i class="bi bi-person-gear"></i>Manajemen User
+              </a>
+            </li>
+            <li class="nav-item" id="menuAudit" style="display: none;">
+              <a class="nav-link" href="#" onclick="showPage('audit')">
+                <i class="bi bi-journal-text"></i>Audit Log
+              </a>
+            </li>
+            <li class="nav-item" id="menuImport" style="display: none;">
+              <a class="nav-link" href="#" onclick="showPage('import')">
+                <i class="bi bi-cloud-upload"></i>Import Data
+              </a>
+            </li>
+            <li class="nav-item" id="menuSettings" style="display: none;">
+              <a class="nav-link" href="#" onclick="showPage('settings')">
+                <i class="bi bi-gear"></i>Pengaturan
+              </a>
+            </li>
+          </ul>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="col-lg-10 py-4" style="background: var(--bg-light);">
+          
+          <!-- Dashboard Page -->
+          <div id="page-dashboard" class="page-section active">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+              <h4 class="mb-0">Dashboard</h4>
+              <button class="btn btn-outline-primary btn-sm" onclick="loadDashboard()">
+                <i class="bi bi-arrow-clockwise me-1"></i>Refresh
+              </button>
+            </div>
+            
+            <div class="row mb-4" id="statsContainer">
+              <!-- Stats cards will be loaded here -->
+            </div>
+            
+            <div class="row">
+              <div class="col-md-6 mb-4">
+                <div class="card card-stat">
+                  <div class="card-body">
+                    <h6 class="card-title mb-3">Karyawan per Divisi</h6>
+                    <div id="divisionStats"></div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6 mb-4">
+                <div class="card card-stat">
+                  <div class="card-body">
+                    <h6 class="card-title mb-3">Karyawan per Unit</h6>
+                    <div id="unitStats"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="text-muted small" id="lastUpdated"></div>
+          </div>
+
+          <!-- Employees Page -->
+          <div id="page-employees" class="page-section">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+              <h4 class="mb-0">Data Pegawai</h4>
+              <button class="btn btn-primary" onclick="showAddEmployeeModal()" id="btnAddEmployee" style="display: none;">
+                <i class="bi bi-plus-lg me-1"></i>Tambah Pegawai
+              </button>
+            </div>
+            
+            <!-- Filters -->
+            <div class="card card-stat mb-4">
+              <div class="card-body">
+                <div class="row g-3">
+                  <div class="col-md-3">
+                    <div class="search-box">
+                      <i class="bi bi-search"></i>
+                      <input type="text" class="form-control" placeholder="Cari nama, ID, NIK..." id="searchInput" oninput="filterEmployees()">
+                    </div>
+                  </div>
+                  <div class="col-md-2">
+                    <select class="form-select" id="filterDepartment" onchange="filterEmployees()">
+                      <option value="all">Semua Divisi</option>
+                    </select>
+                  </div>
+                  <div class="col-md-2">
+                    <select class="form-select" id="filterUnit" onchange="filterEmployees()">
+                      <option value="all">Semua Unit</option>
+                    </select>
+                  </div>
+                  <div class="col-md-2">
+                    <select class="form-select" id="filterStatus" onchange="filterEmployees()">
+                      <option value="all">Semua Status</option>
+                      <option value="Tetap">Tetap</option>
+                      <option value="Kontrak">Kontrak</option>
+                      <option value="Relawan">Relawan</option>
+                    </select>
+                  </div>
+                  <div class="col-md-2">
+                    <select class="form-select" id="filterGender" onchange="filterEmployees()">
+                      <option value="all">Semua Gender</option>
+                      <option value="L">Laki-laki</option>
+                      <option value="P">Perempuan</option>
+                    </select>
+                  </div>
+                  <div class="col-md-1">
+                    <button class="btn btn-outline-secondary w-100" onclick="resetFilters()">
+                      <i class="bi bi-x-lg"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Employee Table -->
+            <div class="table-container">
+              <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                  <thead>
+                    <tr>
+                      <th>ID</th>
+                      <th>Nama</th>
+                      <th>Posisi</th>
+                      <th>Divisi</th>
+                      <th>Status</th>
+                      <th>Level</th>
+                      <th>Masa Kerja</th>
+                      <th>Aksi</th>
+                    </tr>
+                  </thead>
+                  <tbody id="employeeTableBody">
+                    <!-- Data will be loaded here -->
+                  </tbody>
+                </table>
+              </div>
+              <div class="loading-spinner" id="employeeLoading">
+                <div class="spinner-border text-primary" role="status">
+                  <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mt-2 text-muted">Memuat data...</p>
+              </div>
+              <div class="empty-state" id="employeeEmpty" style="display: none;">
+                <i class="bi bi-inbox"></i>
+                <p>Tidak ada data ditemukan</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Employee Detail Page -->
+          <div id="page-employee-detail" class="page-section">
+            <div class="mb-3">
+              <button class="btn btn-outline-secondary" onclick="showPage('employees')">
+                <i class="bi bi-arrow-left me-1"></i>Kembali ke Daftar
+              </button>
+            </div>
+            
+            <div class="detail-header">
+              <div class="d-flex align-items-center">
+                <div class="detail-avatar me-4" id="detailAvatar"></div>
+                <div>
+                  <h4 class="mb-1" id="detailName"></h4>
+                  <p class="mb-0 opacity-75" id="detailPosition"></p>
+                  <span class="badge bg-light text-dark mt-2" id="detailDepartment"></span>
+                </div>
+              </div>
+            </div>
+            
+            <ul class="nav nav-tabs mb-4" id="detailTabs">
+              <li class="nav-item">
+                <a class="nav-link active" href="#" onclick="showDetailTab('profil')">Profil</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="#" onclick="showDetailTab('kepegawaian')">Kepegawaian</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="#" onclick="showDetailTab('keluarga')">Keluarga</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="#" onclick="showDetailTab('karir')">Riwayat Karir</a>
+              </li>
+            </ul>
+            
+            <div id="detailContent">
+              <!-- Detail content will be loaded here -->
+            </div>
+          </div>
+
+          <!-- Users Page -->
+          <div id="page-users" class="page-section">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+              <h4 class="mb-0">Manajemen User</h4>
+              <button class="btn btn-primary" onclick="showAddUserModal()">
+                <i class="bi bi-plus-lg me-1"></i>Tambah User
+              </button>
+            </div>
+            
+            <div class="table-container">
+              <table class="table table-hover align-middle">
+                <thead>
+                  <tr>
+                    <th>Email</th>
+                    <th>Nama</th>
+                    <th>Role</th>
+                    <th>Departemen</th>
+                    <th>Status</th>
+                    <th>Login Terakhir</th>
+                    <th>Aksi</th>
+                  </tr>
+                </thead>
+                <tbody id="userTableBody">
+                  <!-- Data will be loaded here -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Audit Log Page -->
+          <div id="page-audit" class="page-section">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+              <h4 class="mb-0">Audit Log</h4>
+              <button class="btn btn-outline-primary btn-sm" onclick="loadAuditLog()">
+                <i class="bi bi-arrow-clockwise me-1"></i>Refresh
+              </button>
+            </div>
+            
+            <div class="card card-stat mb-4">
+              <div class="card-body">
+                <div class="row g-3">
+                  <div class="col-md-3">
+                    <select class="form-select" id="auditModule">
+                      <option value="">Semua Modul</option>
+                      <option value="Data Pegawai">Data Pegawai</option>
+                      <option value="Riwayat Karir">Riwayat Karir</option>
+                      <option value="User Management">User Management</option>
+                      <option value="Auth">Autentikasi</option>
+                    </select>
+                  </div>
+                  <div class="col-md-3">
+                    <input type="date" class="form-control" id="auditStartDate">
+                  </div>
+                  <div class="col-md-3">
+                    <input type="date" class="form-control" id="auditEndDate">
+                  </div>
+                  <div class="col-md-3">
+                    <button class="btn btn-primary w-100" onclick="loadAuditLog()">Filter</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="table-container">
+              <table class="table table-hover align-middle">
+                <thead>
+                  <tr>
+                    <th>Waktu</th>
+                    <th>User</th>
+                    <th>Aksi</th>
+                    <th>Modul</th>
+                    <th>ID Karyawan</th>
+                    <th>Field</th>
+                    <th>Nilai Lama</th>
+                    <th>Nilai Baru</th>
+                  </tr>
+                </thead>
+                <tbody id="auditTableBody">
+                  <!-- Data will be loaded here -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Import Page -->
+          <div id="page-import" class="page-section">
+            <h4 class="mb-4">Import Data dari Spreadsheet</h4>
+            
+            <div class="card card-stat">
+              <div class="card-body">
+                <div class="text-center py-5">
+                  <i class="bi bi-cloud-arrow-up fs-1 text-primary mb-3"></i>
+                  <h5>Import dari Spreadsheet Sumber</h5>
+                  <p class="text-muted mb-4">
+                    Data akan diimpor dari spreadsheet LAZWaf Al Azhar.<br>
+                    Pastikan data sudah benar sebelum melakukan import.
+                  </p>
+                  <button class="btn btn-primary btn-lg" onclick="importData()" id="btnImport">
+                    <i class="bi bi-download me-2"></i>Mulai Import
+                  </button>
+                  <div class="mt-4" id="importProgress" style="display: none;">
+                    <div class="progress" style="height: 20px;">
+                      <div class="progress-bar progress-bar-striped progress-bar-animated" id="importProgressBar" style="width: 0%"></div>
+                    </div>
+                    <p class="mt-2 text-muted" id="importStatus">Memproses...</p>
+                  </div>
+                  <div class="mt-4 text-start" id="importResult" style="display: none;">
+                    <div class="alert" id="importResultAlert"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Settings Page -->
+          <div id="page-settings" class="page-section">
+            <h4 class="mb-4">Pengaturan</h4>
+            
+            <div class="row">
+              <div class="col-md-6 mb-4">
+                <div class="card card-stat">
+                  <div class="card-body">
+                    <h6 class="card-title">Konfigurasi Widget Dashboard</h6>
+                    <div id="widgetConfigList">
+                      <!-- Widget config will be loaded here -->
+                    </div>
+                    <button class="btn btn-primary mt-3" onclick="saveWidgetConfig()">
+                      <i class="bi bi-save me-1"></i>Simpan Konfigurasi
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6 mb-4">
+                <div class="card card-stat">
+                  <div class="card-body">
+                    <h6 class="card-title">Informasi Sistem</h6>
+                    <table class="table table-borderless">
+                      <tr>
+                        <td class="text-muted">Versi</td>
+                        <td>1.0.0</td>
+                      </tr>
+                      <tr>
+                        <td class="text-muted">Platform</td>
+                        <td>Google Apps Script</td>
+                      </tr>
+                      <tr>
+                        <td class="text-muted">Database</td>
+                        <td>Google Sheets</td>
+                      </tr>
+                      <tr>
+                        <td class="text-muted">Terakhir Update</td>
+                        <td id="settingsLastUpdate">-</td>
+                      </tr>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </main>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add/Edit Employee Modal -->
+  <div class="modal fade" id="employeeModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="employeeModalTitle">Tambah Pegawai</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <form id="employeeForm">
+            <input type="hidden" id="empId">
+            
+            <!-- Step Indicators -->
+            <div class="d-flex justify-content-center mb-4">
+              <div class="step-indicator active" data-step="1">1. Identitas</div>
+              <div class="step-indicator" data-step="2">2. Pribadi</div>
+              <div class="step-indicator" data-step="3">3. Pendidikan</div>
+              <div class="step-indicator" data-step="4">4. Keluarga</div>
+            </div>
+            
+            <!-- Step 1 -->
+            <div class="form-step active" id="step1">
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label class="form-label">Employee ID *</label>
+                  <input type="text" class="form-control" id="empEmployeeId" required>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Nama Lengkap *</label>
+                  <input type="text" class="form-control" id="empFullName" required>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Posisi Saat Ini *</label>
+                  <input type="text" class="form-control" id="empPosition" required>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Departemen *</label>
+                  <select class="form-select" id="empDepartment" required onchange="updateUnits()">
+                    <option value="">Pilih Departemen</option>
+                    <option value="Sekretariat">Sekretariat</option>
+                    <option value="Keuangan">Keuangan</option>
+                    <option value="LAZ Al Azhar">LAZ Al Azhar</option>
+                    <option value="Fundraising & Partnership">Fundraising & Partnership</option>
+                    <option value="Program">Program</option>
+                  </select>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Unit *</label>
+                  <select class="form-select" id="empUnit" required>
+                    <option value="">Pilih Unit</option>
+                  </select>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Status Kepegawaian *</label>
+                  <select class="form-select" id="empStatus" required>
+                    <option value="">Pilih Status</option>
+                    <option value="Tetap">Tetap</option>
+                    <option value="Kontrak">Kontrak</option>
+                    <option value="Relawan">Relawan (Berbayar, Tanpa Tunjangan)</option>
+                  </select>
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label">Level *</label>
+                  <select class="form-select" id="empLevel" required>
+                    <option value="">Pilih Level</option>
+                    <option value="5A">5A</option>
+                    <option value="5C">5C</option>
+                    <option value="4A">4A</option>
+                    <option value="4B">4B</option>
+                    <option value="4C">4C</option>
+                    <option value="3A">3A</option>
+                    <option value="3B">3B</option>
+                    <option value="3C">3C</option>
+                    <option value="2A">2A</option>
+                    <option value="2B">2B</option>
+                    <option value="2C">2C</option>
+                    <option value="1">1</option>
+                    <option value="1C">1C</option>
+                  </select>
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label">Job Level *</label>
+                  <select class="form-select" id="empJobLevel" required>
+                    <option value="">Pilih Job Level</option>
+                    <option value="Kepala Divisi">Kepala Divisi</option>
+                    <option value="Manager">Manager</option>
+                    <option value="Koordinator">Koordinator</option>
+                    <option value="Staf">Staf</option>
+                    <option value="Non Staf">Non Staf</option>
+                    <option value="Relawan">Relawan</option>
+                  </select>
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label">Tanggal Masuk *</label>
+                  <input type="date" class="form-control" id="empJoinDate" required>
+                </div>
+              </div>
+              <div class="text-end mt-4">
+                <button type="button" class="btn btn-primary" onclick="nextStep(2)">Selanjutnya</button>
+              </div>
+            </div>
+            
+            <!-- Step 2 -->
+            <div class="form-step" id="step2">
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label class="form-label">Tempat Lahir *</label>
+                  <input type="text" class="form-control" id="empPlaceOfBirth" required>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Tanggal Lahir *</label>
+                  <input type="date" class="form-control" id="empDateOfBirth" required>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Jenis Kelamin *</label>
+                  <div>
+                    <div class="form-check form-check-inline">
+                      <input class="form-check-input" type="radio" name="empGender" id="empGenderL" value="L" required>
+                      <label class="form-check-label">Laki-laki</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                      <input class="form-check-input" type="radio" name="empGender" id="empGenderP" value="P">
+                      <label class="form-check-label">Perempuan</label>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Status Nikah *</label>
+                  <select class="form-select" id="empMaritalStatus" required>
+                    <option value="">Pilih Status</option>
+                    <option value="Menikah">Menikah</option>
+                    <option value="Single">Single</option>
+                    <option value="Janda">Janda</option>
+                    <option value="Duda">Duda</option>
+                  </select>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">No. HP *</label>
+                  <input type="tel" class="form-control" id="empPhone" required placeholder="08xx">
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Email Kantor</label>
+                  <input type="email" class="form-control" id="empEmail">
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">NIK</label>
+                  <input type="text" class="form-control" id="empNik" maxlength="16" placeholder="16 digit">
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Email Pribadi</label>
+                  <input type="email" class="form-control" id="empEmailPribadi">
+                </div>
+                <div class="col-12">
+                  <label class="form-label">Alamat KTP</label>
+                  <textarea class="form-control" id="empNikAddress" rows="2"></textarea>
+                </div>
+                <div class="col-12">
+                  <label class="form-label">Alamat Domisili</label>
+                  <textarea class="form-control" id="empResidentialAddress" rows="2"></textarea>
+                </div>
+              </div>
+              <div class="d-flex justify-content-between mt-4">
+                <button type="button" class="btn btn-outline-secondary" onclick="prevStep(1)">Sebelumnya</button>
+                <button type="button" class="btn btn-primary" onclick="nextStep(3)">Selanjutnya</button>
+              </div>
+            </div>
+            
+            <!-- Step 3 -->
+            <div class="form-step" id="step3">
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label class="form-label">Pendidikan Terakhir</label>
+                  <select class="form-select" id="empEducation">
+                    <option value="">Pilih Pendidikan</option>
+                    <option value="SD">SD</option>
+                    <option value="SMP">SMP</option>
+                    <option value="SMA/SMK">SMA/SMK</option>
+                    <option value="D3">D3</option>
+                    <option value="S1">S1</option>
+                    <option value="S2">S2</option>
+                    <option value="S3">S3</option>
+                  </select>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Nama Institusi</label>
+                  <input type="text" class="form-control" id="empInstitution">
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Kota Institusi</label>
+                  <input type="text" class="form-control" id="empInstitutionPlace">
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Tanggal Lulus</label>
+                  <input type="date" class="form-control" id="empGraduationDate">
+                </div>
+              </div>
+              <div class="d-flex justify-content-between mt-4">
+                <button type="button" class="btn btn-outline-secondary" onclick="prevStep(2)">Sebelumnya</button>
+                <button type="button" class="btn btn-primary" onclick="nextStep(4)">Selanjutnya</button>
+              </div>
+            </div>
+            
+            <!-- Step 4 -->
+            <div class="form-step" id="step4">
+              <div class="row g-3">
+                <div class="col-12">
+                  <h6>Data Keluarga (Opsional)</h6>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Nama Pasangan</label>
+                  <input type="text" class="form-control" id="empSpouseName">
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Tanggal Lahir Pasangan</label>
+                  <input type="date" class="form-control" id="empSpouseDob">
+                </div>
+                <div class="col-12">
+                  <label class="form-label">Daftar Anak</label>
+                  <div id="childrenContainer">
+                    <!-- Dynamic children inputs -->
+                  </div>
+                  <button type="button" class="btn btn-outline-primary btn-sm mt-2" onclick="addChild()">
+                    <i class="bi bi-plus me-1"></i>Tambah Anak
+                  </button>
+                </div>
+              </div>
+              <div class="d-flex justify-content-between mt-4">
+                <button type="button" class="btn btn-outline-secondary" onclick="prevStep(3)">Sebelumnya</button>
+                <button type="button" class="btn btn-success" onclick="saveEmployee()">
+                  <i class="bi bi-check-lg me-1"></i>Simpan
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add User Modal -->
+  <div class="modal fade" id="userModal" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="userModalTitle">Tambah User</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <form id="userForm">
+            <input type="hidden" id="userId">
+            <div class="mb-3">
+              <label class="form-label">Email *</label>
+              <input type="email" class="form-control" id="userEmailInput" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Nama *</label>
+              <input type="text" class="form-control" id="userName" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Role *</label>
+              <select class="form-select" id="userRoleInput" required>
+                <option value="">Pilih Role</option>
+                <option value="super_admin">Super Admin</option>
+                <option value="admin_hr">Admin HR</option>
+                <option value="manager_divisi">Manager Divisi</option>
+                <option value="staf_viewer">Staf Viewer</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Departemen</label>
+              <select class="form-select" id="userDepartment">
+                <option value="">Pilih Departemen</option>
+                <option value="Sekretariat">Sekretariat</option>
+                <option value="Keuangan">Keuangan</option>
+                <option value="LAZ Al Azhar">LAZ Al Azhar</option>
+                <option value="Fundraising & Partnership">Fundraising & Partnership</option>
+                <option value="Program">Program</option>
+              </select>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+          <button type="button" class="btn btn-primary" onclick="saveUser()">Simpan</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Career History Modal -->
+  <div class="modal fade" id="careerModal" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="careerModalTitle">Tambah Riwayat Karir</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <form id="careerForm">
+            <input type="hidden" id="careerId">
+            <input type="hidden" id="careerEmployeeId">
+            <div class="mb-3">
+              <label class="form-label">Jabatan *</label>
+              <input type="text" class="form-control" id="careerJabatan" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Departemen</label>
+              <input type="text" class="form-control" id="careerDepartment">
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Unit</label>
+              <input type="text" class="form-control" id="careerUnit">
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Tanggal Mulai *</label>
+              <input type="date" class="form-control" id="careerStartDate" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Tanggal Selesai</label>
+              <input type="date" class="form-control" id="careerEndDate">
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Keterangan</label>
+              <textarea class="form-control" id="careerKeterangan" rows="2"></textarea>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="careerIsCurrent">
+              <label class="form-check-label">Posisi Saat Ini</label>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+          <button type="button" class="btn btn-primary" onclick="saveCareerHistory()">Simpan</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // Global variables
+    let currentUser = null;
+    let currentPage = 'dashboard';
+    let allEmployees = [];
+    let masterData = { divisions: [], units: [], levels: [] };
+    let widgetConfig = [];
+    let childCount = 0;
+
+    // Unit mapping
+    const unitMapping = {
+      'Sekretariat': ['Direksi', 'Kelembagaan', 'Humas, GA, dan IT', 'Diklat & Litbang'],
+      'Keuangan': ['Direksi', 'Pengeluaran', 'Penerimaan', 'Anggaran & Akuntansi'],
+      'LAZ Al Azhar': ['Direksi'],
+      'Fundraising & Partnership': ['Internal Fundraising', 'Eksternal Fundraising'],
+      'Program': ['Program']
+    };
+
+    // ============================================================
+    // AUTHENTICATION
+    // ============================================================
+
+    function loginWithGoogle() {
+      google.script.run
+        .withSuccessHandler(function(response) {
+          if (response.success) {
+            currentUser = response.data.user;
+            showApp();
+          } else {
+            document.getElementById('loginMessage').textContent = response.message;
+            document.getElementById('loginMessage').className = 'text-danger';
+          }
+        })
+        .withFailureHandler(function(error) {
+          document.getElementById('loginMessage').textContent = 'Terjadi kesalahan: ' + error.message;
+          document.getElementById('loginMessage').className = 'text-danger';
+        })
+        .handleLogin({ email: '' });
+    }
+
+    function showApp() {
+      document.getElementById('loginPage').style.display = 'none';
+      document.getElementById('appContainer').style.display = 'block';
+      
+      // Update user info
+      document.getElementById('userEmail').textContent = currentUser.email;
+      document.getElementById('userRole').textContent = getRoleLabel(currentUser.role);
+      
+      // Show/hide menu based on role
+      if (currentUser.role === 'super_admin') {
+        document.getElementById('menuUsers').style.display = 'block';
+        document.getElementById('menuAudit').style.display = 'block';
+        document.getElementById('menuImport').style.display = 'block';
+        document.getElementById('menuSettings').style.display = 'block';
+      } else if (currentUser.role === 'admin_hr') {
+        document.getElementById('menuAudit').style.display = 'block';
+        document.getElementById('menuImport').style.display = 'block';
+      }
+      
+      // Show add employee button for admin
+      if (currentUser.role === 'super_admin' || currentUser.role === 'admin_hr') {
+        document.getElementById('btnAddEmployee').style.display = 'inline-block';
+      }
+      
+      loadDashboard();
+    }
+
+    function logout() {
+      currentUser = null;
+      document.getElementById('loginPage').style.display = 'flex';
+      document.getElementById('appContainer').style.display = 'none';
+    }
+
+    function getRoleLabel(role) {
+      const labels = {
+        'super_admin': 'Super Admin',
+        'admin_hr': 'Admin HR',
+        'manager_divisi': 'Manager Divisi',
+        'staf_viewer': 'Staf Viewer'
+      };
+      return labels[role] || role;
+    }
+
+    // ============================================================
+    // NAVIGATION
+    // ============================================================
+
+    function showPage(page) {
+      // Hide all pages
+      document.querySelectorAll('.page-section').forEach(el => {
+        el.classList.remove('active');
+      });
+      
+      // Show target page
+      document.getElementById('page-' + page).classList.add('active');
+      
+      // Update sidebar active state
+      document.querySelectorAll('.sidebar .nav-link').forEach(el => {
+        el.classList.remove('active');
+      });
+      event.target.closest('.nav-link').classList.add('active');
+      
+      currentPage = page;
+      
+      // Load page data
+      switch(page) {
+        case 'dashboard':
+          loadDashboard();
+          break;
+        case 'employees':
+          loadEmployees();
+          break;
+        case 'users':
+          loadUsers();
+          break;
+        case 'audit':
+          loadAuditLog();
+          break;
+        case 'settings':
+          loadSettings();
+          break;
+      }
+    }
+
+    function toggleSidebar() {
+      document.getElementById('sidebar').classList.toggle('show');
+    }
+
+    // ============================================================
+    // DASHBOARD
+    // ============================================================
+
+    function loadDashboard() {
+      google.script.run
+        .withSuccessHandler(function(response) {
+          if (response.success) {
+            renderDashboard(response.data);
+          }
+        })
+        .withFailureHandler(function(error) {
+          console.error('Error loading dashboard:', error);
+        })
+        .getDashboardData();
+    }
+
+    function renderDashboard(data) {
+      const stats = data.stats;
+      
+      // Render stat cards
+      const statsHtml = `
+        <div class="col-xl-3 col-md-6 mb-4">
+          <div class="card card-stat">
+            <div class="card-body d-flex align-items-center">
+              <div class="stat-icon blue me-3">
+                <i class="bi bi-people"></i>
+              </div>
+              <div>
+                <div class="stat-number">${stats.totalAktif}</div>
+                <div class="stat-label">Total Karyawan Aktif</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-4">
+          <div class="card card-stat">
+            <div class="card-body d-flex align-items-center">
+              <div class="stat-icon green me-3">
+                <i class="bi bi-person-check"></i>
+              </div>
+              <div>
+                <div class="stat-number">${stats.totalTetap}</div>
+                <div class="stat-label">Karyawan Tetap</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-4">
+          <div class="card card-stat">
+            <div class="card-body d-flex align-items-center">
+              <div class="stat-icon yellow me-3">
+                <i class="bi bi-file-earmark-text"></i>
+              </div>
+              <div>
+                <div class="stat-number">${stats.totalKontrak}</div>
+                <div class="stat-label">Karyawan Kontrak</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-4">
+          <div class="card card-stat">
+            <div class="card-body d-flex align-items-center">
+              <div class="stat-icon purple me-3">
+                <i class="bi bi-heart"></i>
+              </div>
+              <div>
+                <div class="stat-number">${stats.totalRelawan}</div>
+                <div class="stat-label">Relawan</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+      document.getElementById('statsContainer').innerHTML = statsHtml;
+      
+      // Render division stats
+      let divisionHtml = '';
+      for (const [div, count] of Object.entries(stats.perDivisi)) {
+        divisionHtml += `
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <span>${div}</span>
+            <span class="badge bg-primary">${count}</span>
+          </div>
+        `;
+      }
+      document.getElementById('divisionStats').innerHTML = divisionHtml || '<p class="text-muted">Tidak ada data</p>';
+      
+      // Render unit stats
+      let unitHtml = '';
+      for (const [unit, count] of Object.entries(stats.perUnit)) {
+        unitHtml += `
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <span>${unit}</span>
+            <span class="badge bg-secondary">${count}</span>
+          </div>
+        `;
+      }
+      document.getElementById('unitStats').innerHTML = unitHtml || '<p class="text-muted">Tidak ada data</p>';
+      
+      // Update last updated
+      document.getElementById('lastUpdated').textContent = 'Terakhir diperbarui: ' + new Date(data.lastUpdated).toLocaleTimeString('id-ID');
+    }
+
+    // ============================================================
+    // EMPLOYEES
+    // ============================================================
+
+    function loadEmployees() {
+      document.getElementById('employeeLoading').classList.add('show');
+      document.getElementById('employeeTableBody').innerHTML = '';
+      document.getElementById('employeeEmpty').style.display = 'none';
+      
+      google.script.run
+        .withSuccessHandler(function(response) {
+          document.getElementById('employeeLoading').classList.remove('show');
+          
+          if (response.success) {
+            allEmployees = response.data.employees;
+            renderEmployeeTable(allEmployees);
+            populateDepartmentFilter();
+          }
+        })
+        .withFailureHandler(function(error) {
+          document.getElementById('employeeLoading').classList.remove('show');
+          console.error('Error loading employees:', error);
+        })
+        .getEmployees({});
+    }
+
+    function renderEmployeeTable(employees) {
+      const tbody = document.getElementById('employeeTableBody');
+      
+      if (employees.length === 0) {
+        document.getElementById('employeeEmpty').style.display = 'block';
+        return;
+      }
+      
+      let html = '';
+      employees.forEach(emp => {
+        const statusBadge = getStatusBadge(emp.employmentStatus);
+        const initials = getInitials(emp.fullName);
+        
+        html += `
+          <tr>
+            <td><code>${emp.employeeId}</code></td>
+            <td>
+              <div class="d-flex align-items-center">
+                <div class="employee-avatar me-2">${initials}</div>
+                <div>
+                  <div class="fw-medium">${emp.fullName}</div>
+                  <small class="text-muted">${emp.email || '-'}</small>
+                </div>
+              </div>
+            </td>
+            <td><small>${emp.currentPosition || '-'}</small></td>
+            <td>${emp.department || '-'}</td>
+            <td>${statusBadge}</td>
+            <td><span class="badge bg-light text-dark">${emp.level || '-'}</span></td>
+            <td><small>${emp.workDuration || '-'}</small></td>
+            <td>
+              <div class="btn-group btn-group-sm">
+                <button class="btn btn-outline-primary" onclick="viewEmployee('${emp.id}')" title="Detail">
+                  <i class="bi bi-eye"></i>
+                </button>
+                <button class="btn btn-outline-warning" onclick="editEmployee('${emp.id}')" title="Edit" 
+                  ${(currentUser.role === 'super_admin' || currentUser.role === 'admin_hr') ? '' : 'style="display:none"'}>
+                  <i class="bi bi-pencil"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+        `;
+      });
+      
+      tbody.innerHTML = html;
+    }
+
+    function getStatusBadge(status) {
+      const badges = {
+        'Tetap': '<span class="badge badge-tetap">Tetap</span>',
+        'Kontrak': '<span class="badge badge-kontrak">Kontrak</span>',
+        'Relawan': '<span class="badge badge-relawan">Relawan</span>'
+      };
+      return badges[status] || status;
+    }
+
+    function getInitials(name) {
+      if (!name) return '?';
+      return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+    }
+
+    function populateDepartmentFilter() {
+      const departments = [...new Set(allEmployees.map(e => e.department).filter(d => d))];
+      const select = document.getElementById('filterDepartment');
+      
+      // Keep first option
+      while (select.options.length > 1) {
+        select.remove(1);
+      }
+      
+      departments.forEach(dept => {
+        const option = document.createElement('option');
+        option.value = dept;
+        option.textContent = dept;
+        select.appendChild(option);
+      });
+    }
+
+    function filterEmployees() {
+      const search = document.getElementById('searchInput').value.toLowerCase();
+      const department = document.getElementById('filterDepartment').value;
+      const unit = document.getElementById('filterUnit').value;
+      const status = document.getElementById('filterStatus').value;
+      const gender = document.getElementById('filterGender').value;
+      
+      let filtered = allEmployees;
+      
+      if (search) {
+        filtered = filtered.filter(e => 
+          (e.fullName && e.fullName.toLowerCase().includes(search)) ||
+          (e.employeeId && e.employeeId.toLowerCase().includes(search)) ||
+          (e.nik && e.nik.includes(search)) ||
+          (e.currentPosition && e.currentPosition.toLowerCase().includes(search))
+        );
+      }
+      
+      if (department !== 'all') {
+        filtered = filtered.filter(e => e.department === department);
+      }
+      
+      if (unit !== 'all') {
+        filtered = filtered.filter(e => e.unit === unit);
+      }
+      
+      if (status !== 'all') {
+        filtered = filtered.filter(e => e.employmentStatus === status);
+      }
+      
+      if (gender !== 'all') {
+        filtered = filtered.filter(e => e.gender === gender);
+      }
+      
+      renderEmployeeTable(filtered);
+    }
+
+    function resetFilters() {
+      document.getElementById('searchInput').value = '';
+      document.getElementById('filterDepartment').value = 'all';
+      document.getElementById('filterUnit').value = 'all';
+      document.getElementById('filterStatus').value = 'all';
+      document.getElementById('filterGender').value = 'all';
+      renderEmployeeTable(allEmployees);
+    }
+
+    // ============================================================
+    // EMPLOYEE DETAIL
+    // ============================================================
+
+    function viewEmployee(id) {
+      showPage('employee-detail');
+      
+      google.script.run
+        .withSuccessHandler(function(response) {
+          if (response.success) {
+            renderEmployeeDetail(response.data);
+          }
+        })
+        .withFailureHandler(function(error) {
+          console.error('Error loading employee:', error);
+        })
+        .getEmployee(id);
+    }
+
+    function renderEmployeeDetail(data) {
+      const emp = data.employee;
+      const career = data.careerHistory;
+      const family = data.familyMembers;
+      
+      // Header
+      document.getElementById('detailAvatar').textContent = getInitials(emp.fullName);
+      document.getElementById('detailName').textContent = emp.fullName;
+      document.getElementById('detailPosition').textContent = emp.currentPosition;
+      document.getElementById('detailDepartment').textContent = emp.department + ' - ' + (emp.unit || '');
+      
+      // Store employee data for tabs
+      window.currentEmployee = emp;
+      window.currentCareer = career;
+      window.currentFamily = family;
+      
+      // Show profil tab by default
+      showDetailTab('profil');
+    }
+
+    function showDetailTab(tab) {
+      // Update tab active state
+      document.querySelectorAll('#detailTabs .nav-link').forEach(el => {
+        el.classList.remove('active');
+      });
+      event.target.classList.add('active');
+      
+      const emp = window.currentEmployee;
+      const career = window.currentCareer;
+      const family = window.currentFamily;
+      
+      let html = '';
+      
+      switch(tab) {
+        case 'profil':
+          html = `
+            <div class="row g-4">
+              <div class="col-md-6">
+                <div class="card card-stat">
+                  <div class="card-body">
+                    <h6 class="card-title mb-3">Informasi Pribadi</h6>
+                    <div class="row">
+                      <div class="col-6 mb-3">
+                        <div class="info-label">Tempat Lahir</div>
+                        <div class="info-value">${emp.placeOfBirth || '-'}</div>
+                      </div>
+                      <div class="col-6 mb-3">
+                        <div class="info-label">Tanggal Lahir</div>
+                        <div class="info-value">${emp.dateOfBirth || '-'}</div>
+                      </div>
+                      <div class="col-6 mb-3">
+                        <div class="info-label">Jenis Kelamin</div>
+                        <div class="info-value">${emp.gender === 'L' ? 'Laki-laki' : 'Perempuan'}</div>
+                      </div>
+                      <div class="col-6 mb-3">
+                        <div class="info-label">Status Nikah</div>
+                        <div class="info-value">${emp.maritalStatus || '-'}</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="card card-stat">
+                  <div class="card-body">
+                    <h6 class="card-title mb-3">Kontak</h6>
+                    <div class="row">
+                      <div class="col-12 mb-3">
+                        <div class="info-label">No. HP</div>
+                        <div class="info-value">${emp.phone || '-'}</div>
+                      </div>
+                      <div class="col-12 mb-3">
+                        <div class="info-label">Email Kantor</div>
+                        <div class="info-value">${emp.email || '-'}</div>
+                      </div>
+                      <div class="col-12 mb-3">
+                        <div class="info-label">Email Pribadi</div>
+                        <div class="info-value">${emp.emailPribadi || '-'}</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-12">
+                <div class="card card-stat">
+                  <div class="card-body">
+                    <h6 class="card-title mb-3">Alamat</h6>
+                    <div class="row">
+                      <div class="col-md-6 mb-3">
+                        <div class="info-label">Alamat KTP</div>
+                        <div class="info-value">${emp.nikAddress || '-'}</div>
+                      </div>
+                      <div class="col-md-6 mb-3">
+                        <div class="info-label">Alamat Domisili</div>
+                        <div class="info-value">${emp.residentialAddress || '-'}</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          `;
+          break;
+          
+        case 'kepegawaian':
+          html = `
+            <div class="row g-4">
+              <div class="col-md-6">
+                <div class="card card-stat">
+                  <div class="card-body">
+                    <h6 class="card-title mb-3">Informasi Kepegawaian</h6>
+                    <div class="row">
+                      <div class="col-6 mb-3">
+                        <div class="info-label">Employee ID</div>
+                        <div class="info-value"><code>${emp.employeeId}</code></div>
+                      </div>
+                      <div class="col-6 mb-3">
+                        <div class="info-label">Status</div>
+                        <div class="info-value">${getStatusBadge(emp.employmentStatus)}</div>
+                      </div>
+                      <div class="col-6 mb-3">
+                        <div class="info-label">Level</div>
+                        <div class="info-value">${emp.level || '-'}</div>
+                      </div>
+                      <div class="col-6 mb-3">
+                        <div class="info-label">Job Level</div>
+                        <div class="info-value">${emp.jobLevel || '-'}</div>
+                      </div>
+                      <div class="col-6 mb-3">
+                        <div class="info-label">Tanggal Masuk</div>
+                        <div class="info-value">${emp.joinDate || '-'}</div>
+                      </div>
+                      <div class="col-6 mb-3">
+                        <div class="info-label">Masa Kerja</div>
+                        <div class="info-value">${emp.workDuration}</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="card card-stat">
+                  <div class="card-body">
+                    <h6 class="card-title mb-3">Pendidikan</h6>
+                    <div class="row">
+                      <div class="col-6 mb-3">
+                        <div class="info-label">Pendidikan Terakhir</div>
+                        <div class="info-value">${emp.educationLevel || '-'}</div>
+                      </div>
+                      <div class="col-6 mb-3">
+                        <div class="info-label">Institusi</div>
+                        <div class="info-value">${emp.institutionName || '-'}</div>
+                      </div>
+                      <div class="col-6 mb-3">
+                        <div class="info-label">Kota</div>
+                        <div class="info-value">${emp.institutionPlace || '-'}</div>
+                      </div>
+                      <div class="col-6 mb-3">
+                        <div class="info-label">Tanggal Lulus</div>
+                        <div class="info-value">${emp.graduationDate || '-'}</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          `;
+          break;
+          
+        case 'keluarga':
+          const spouse = family.find(f => f.tipe === 'pasangan');
+          const children = family.filter(f => f.tipe === 'anak');
+          
+          html = `
+            <div class="row g-4">
+              <div class="col-md-6">
+                <div class="card card-stat">
+                  <div class="card-body">
+                    <h6 class="card-title mb-3">Pasangan</h6>
+                    ${spouse ? `
+                      <div class="row">
+                        <div class="col-6 mb-3">
+                          <div class="info-label">Nama</div>
+                          <div class="info-value">${spouse.nama}</div>
+                        </div>
+                        <div class="col-6 mb-3">
+                          <div class="info-label">Tanggal Lahir</div>
+                          <div class="info-value">${spouse.tanggalLahir || '-'}</div>
+                        </div>
+                      </div>
+                    ` : '<p class="text-muted mb-0">Tidak ada data pasangan</p>'}
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="card card-stat">
+                  <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                      <h6 class="card-title mb-0">Anak</h6>
+                      <button class="btn btn-outline-primary btn-sm" onclick="showAddChildModal()">
+                        <i class="bi bi-plus"></i>
+                      </button>
+                    </div>
+                    ${children.length > 0 ? `
+                      <div class="table-responsive">
+                        <table class="table table-sm">
+                          <thead>
+                            <tr>
+                              <th>Nama</th>
+                              <th>Tanggal Lahir</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            ${children.map(c => `
+                              <tr>
+                                <td>${c.nama}</td>
+                                <td>${c.tanggalLahir || '-'}</td>
+                              </tr>
+                            `).join('')}
+                          </tbody>
+                        </table>
+                      </div>
+                    ` : '<p class="text-muted mb-0">Tidak ada data anak</p>'}
+                  </div>
+                </div>
+              </div>
+            </div>
+          `;
+          break;
+          
+        case 'karir':
+          html = `
+            <div class="d-flex justify-content-between align-items-center mb-4">
+              <h6 class="mb-0">Riwayat Karir</h6>
+              <button class="btn btn-primary btn-sm" onclick="showAddCareerModal()">
+                <i class="bi bi-plus me-1"></i>Tambah
+              </button>
+            </div>
+            <div class="timeline">
+              ${career.map((c, idx) => `
+                <div class="timeline-item ${c.isCurrent ? 'current' : ''}">
+                  <div class="d-flex justify-content-between">
+                    <div>
+                      <strong>${c.jabatan}</strong>
+                      <div class="text-muted small">${c.department || ''} ${c.unit ? '- ' + c.unit : ''}</div>
+                    </div>
+                    <div class="text-end">
+                      <div class="small">${c.tanggalMulai || ''} ${c.tanggalSelesai ? '- ' + c.tanggalSelesai : ''}</div>
+                      ${c.isCurrent ? '<span class="badge bg-success">Saat Ini</span>' : ''}
+                    </div>
+                  </div>
+                  ${c.keterangan ? `<div class="text-muted small mt-1">${c.keterangan}</div>` : ''}
+                </div>
+              `).join('')}
+            </div>
+          `;
+          break;
+      }
+      
+      document.getElementById('detailContent').innerHTML = html;
+    }
+
+    // ============================================================
+    // ADD/EDIT EMPLOYEE
+    // ============================================================
+
+    function showAddEmployeeModal() {
+      document.getElementById('employeeModalTitle').textContent = 'Tambah Pegawai';
+      document.getElementById('employeeForm').reset();
+      document.getElementById('empId').value = '';
+      childCount = 0;
+      document.getElementById('childrenContainer').innerHTML = '';
+      resetFormSteps();
+      new bootstrap.Modal(document.getElementById('employeeModal')).show();
+    }
+
+    function editEmployee(id) {
+      google.script.run
+        .withSuccessHandler(function(response) {
+          if (response.success) {
+            const emp = response.data.employee;
+            
+            document.getElementById('employeeModalTitle').textContent = 'Edit Pegawai';
+            document.getElementById('empId').value = emp.id;
+            document.getElementById('empEmployeeId').value = emp.employeeId;
+            document.getElementById('empFullName').value = emp.fullName;
+            document.getElementById('empPosition').value = emp.currentPosition;
+            document.getElementById('empDepartment').value = emp.department;
+            updateUnits();
+            document.getElementById('empUnit').value = emp.unit || '';
+            document.getElementById('empStatus').value = emp.employmentStatus;
+            document.getElementById('empLevel').value = emp.level;
+            document.getElementById('empJobLevel').value = emp.jobLevel;
+            document.getElementById('empJoinDate').value = emp.joinDate;
+            document.getElementById('empPlaceOfBirth').value = emp.placeOfBirth;
+            document.getElementById('empDateOfBirth').value = emp.dateOfBirth;
+            if (emp.gender === 'L') {
+              document.getElementById('empGenderL').checked = true;
+            } else {
+              document.getElementById('empGenderP').checked = true;
+            }
+            document.getElementById('empMaritalStatus').value = emp.maritalStatus;
+            document.getElementById('empPhone').value = emp.phone;
+            document.getElementById('empEmail').value = emp.email || '';
+            document.getElementById('empEmailPribadi').value = emp.emailPribadi || '';
+            document.getElementById('empNik').value = emp.nik || '';
+            document.getElementById('empNikAddress').value = emp.nikAddress || '';
+            document.getElementById('empResidentialAddress').value = emp.residentialAddress || '';
+            document.getElementById('empEducation').value = emp.educationLevel || '';
+            document.getElementById('empInstitution').value = emp.institutionName || '';
+            document.getElementById('empInstitutionPlace').value = emp.institutionPlace || '';
+            document.getElementById('empGraduationDate').value = emp.graduationDate || '';
+            
+            resetFormSteps();
+            new bootstrap.Modal(document.getElementById('employeeModal')).show();
+          }
+        })
+        .withFailureHandler(function(error) {
+          console.error('Error loading employee:', error);
+        })
+        .getEmployee(id);
+    }
+
+    function updateUnits() {
+      const dept = document.getElementById('empDepartment').value;
+      const unitSelect = document.getElementById('empUnit');
+      
+      unitSelect.innerHTML = '<option value="">Pilih Unit</option>';
+      
+      if (unitMapping[dept]) {
+        unitMapping[dept].forEach(unit => {
+          const option = document.createElement('option');
+          option.value = unit;
+          option.textContent = unit;
+          unitSelect.appendChild(option);
+        });
+      }
+    }
+
+    function nextStep(step) {
+      // Validate current step
+      const currentStep = step - 1;
+      const stepEl = document.getElementById('step' + currentStep);
+      const requiredFields = stepEl.querySelectorAll('[required]');
+      
+      let valid = true;
+      requiredFields.forEach(field => {
+        if (!field.value) {
+          field.classList.add('is-invalid');
+          valid = false;
+        } else {
+          field.classList.remove('is-invalid');
+        }
+      });
+      
+      if (!valid) return;
+      
+      // Show next step
+      document.querySelectorAll('.form-step').forEach(el => el.classList.remove('active'));
+      document.getElementById('step' + step).classList.add('active');
+      
+      // Update step indicators
+      document.querySelectorAll('.step-indicator').forEach(el => {
+        const stepNum = parseInt(el.dataset.step);
+        el.classList.toggle('active', stepNum <= step);
+      });
+    }
+
+    function prevStep(step) {
+      document.querySelectorAll('.form-step').forEach(el => el.classList.remove('active'));
+      document.getElementById('step' + step).classList.add('active');
+      
+      document.querySelectorAll('.step-indicator').forEach(el => {
+        const stepNum = parseInt(el.dataset.step);
+        el.classList.toggle('active', stepNum <= step);
+      });
+    }
+
+    function resetFormSteps() {
+      document.querySelectorAll('.form-step').forEach(el => el.classList.remove('active'));
+      document.getElementById('step1').classList.add('active');
+      
+      document.querySelectorAll('.step-indicator').forEach((el, idx) => {
+        el.classList.toggle('active', idx === 0);
+      });
+    }
+
+    function addChild() {
+      childCount++;
+      const container = document.getElementById('childrenContainer');
+      
+      const div = document.createElement('div');
+      div.className = 'row g-2 mb-2 child-row';
+      div.innerHTML = `
+        <div class="col-md-5">
+          <input type="text" class="form-control form-control-sm" placeholder="Nama Anak ${childCount}" data-child-name="${childCount}">
+        </div>
+        <div class="col-md-5">
+          <input type="date" class="form-control form-control-sm" data-child-dob="${childCount}">
+        </div>
+        <div class="col-md-2">
+          <button type="button" class="btn btn-outline-danger btn-sm" onclick="this.closest('.child-row').remove()">
+            <i class="bi bi-trash"></i>
+          </button>
+        </div>
+      `;
+      
+      container.appendChild(div);
+    }
+
+    function saveEmployee() {
+      const data = {
+        id: document.getElementById('empId').value,
+        employeeId: document.getElementById('empEmployeeId').value,
+        fullName: document.getElementById('empFullName').value,
+        currentPosition: document.getElementById('empPosition').value,
+        department: document.getElementById('empDepartment').value,
+        unit: document.getElementById('empUnit').value,
+        employmentStatus: document.getElementById('empStatus').value,
+        level: document.getElementById('empLevel').value,
+        jobLevel: document.getElementById('empJobLevel').value,
+        joinDate: document.getElementById('empJoinDate').value,
+        placeOfBirth: document.getElementById('empPlaceOfBirth').value,
+        dateOfBirth: document.getElementById('empDateOfBirth').value,
+        gender: document.querySelector('input[name="empGender"]:checked')?.value,
+        maritalStatus: document.getElementById('empMaritalStatus').value,
+        phone: document.getElementById('empPhone').value,
+        email: document.getElementById('empEmail').value,
+        emailPribadi: document.getElementById('empEmailPribadi').value,
+        nik: document.getElementById('empNik').value,
+        nikAddress: document.getElementById('empNikAddress').value,
+        residentialAddress: document.getElementById('empResidentialAddress').value,
+        educationLevel: document.getElementById('empEducation').value,
+        institutionName: document.getElementById('empInstitution').value,
+        institutionPlace: document.getElementById('empInstitutionPlace').value,
+        graduationDate: document.getElementById('empGraduationDate').value
+      };
+      
+      // Validate required fields
+      if (!data.employeeId || !data.fullName || !data.department || !data.employmentStatus) {
+        alert('Harap isi semua field yang wajib diisi');
+        return;
+      }
+      
+      const action = data.id ? 'updateEmployee' : 'addEmployee';
+      
+      google.script.run
+        .withSuccessHandler(function(response) {
+          if (response.success) {
+            bootstrap.Modal.getInstance(document.getElementById('employeeModal')).hide();
+            loadEmployees();
+            alert(response.message);
+          } else {
+            alert('Error: ' + response.message);
+          }
+        })
+        .withFailureHandler(function(error) {
+          console.error('Error saving employee:', error);
+        })[action](data);
+    }
+
+    // ============================================================
+    // CAREER HISTORY
+    // ============================================================
+
+    function showAddCareerModal() {
+      document.getElementById('careerModalTitle').textContent = 'Tambah Riwayat Karir';
+      document.getElementById('careerForm').reset();
+      document.getElementById('careerId').value = '';
+      document.getElementById('careerEmployeeId').value = window.currentEmployee.employeeId;
+      new bootstrap.Modal(document.getElementById('careerModal')).show();
+    }
+
+    function editCareer(id) {
+      const career = window.currentCareer.find(c => c.id === id);
+      if (!career) return;
+      
+      document.getElementById('careerModalTitle').textContent = 'Edit Riwayat Karir';
+      document.getElementById('careerId').value = career.id;
+      document.getElementById('careerEmployeeId').value = career.employeeId;
+      document.getElementById('careerJabatan').value = career.jabatan;
+      document.getElementById('careerDepartment').value = career.department || '';
+      document.getElementById('careerUnit').value = career.unit || '';
+      document.getElementById('careerStartDate').value = career.tanggalMulai || '';
+      document.getElementById('careerEndDate').value = career.tanggalSelesai || '';
+      document.getElementById('careerKeterangan').value = career.keterangan || '';
+      document.getElementById('careerIsCurrent').checked = career.isCurrent;
+      
+      new bootstrap.Modal(document.getElementById('careerModal')).show();
+    }
+
+    function saveCareerHistory() {
+      const data = {
+        id: document.getElementById('careerId').value,
+        employeeId: document.getElementById('careerEmployeeId').value,
+        jabatan: document.getElementById('careerJabatan').value,
+        department: document.getElementById('careerDepartment').value,
+        unit: document.getElementById('careerUnit').value,
+        tanggalMulai: document.getElementById('careerStartDate').value,
+        tanggalSelesai: document.getElementById('careerEndDate').value,
+        keterangan: document.getElementById('careerKeterangan').value,
+        isCurrent: document.getElementById('careerIsCurrent').checked
+      };
+      
+      if (!data.jabatan || !data.tanggalMulai) {
+        alert('Harap isi jabatan dan tanggal mulai');
+        return;
+      }
+      
+      const action = data.id ? 'updateCareerHistory' : 'addCareerHistory';
+      
+      google.script.run
+        .withSuccessHandler(function(response) {
+          if (response.success) {
+            bootstrap.Modal.getInstance(document.getElementById('careerModal')).hide();
+            viewEmployee(window.currentEmployee.id);
+            alert(response.message);
+          } else {
+            alert('Error: ' + response.message);
+          }
+        })
+        .withFailureHandler(function(error) {
+          console.error('Error saving career:', error);
+        })[action](data);
+    }
+
+    function deleteCareer(id) {
+      if (!confirm('Yakin ingin menghapus riwayat karir ini?')) return;
+      
+      google.script.run
+        .withSuccessHandler(function(response) {
+          if (response.success) {
+            viewEmployee(window.currentEmployee.id);
+            alert(response.message);
+          } else {
+            alert('Error: ' + response.message);
+          }
+        })
+        .withFailureHandler(function(error) {
+          console.error('Error deleting career:', error);
+        })
+        .deleteCareerHistory(id);
+    }
+
+    // ============================================================
+    // USERS MANAGEMENT
+    // ============================================================
+
+    function loadUsers() {
+      google.script.run
+        .withSuccessHandler(function(response) {
+          if (response.success) {
+            renderUserTable(response.data.users);
+          }
+        })
+        .withFailureHandler(function(error) {
+          console.error('Error loading users:', error);
+        })
+        .getUsers();
+    }
+
+    function renderUserTable(users) {
+      const tbody = document.getElementById('userTableBody');
+      
+      let html = '';
+      users.forEach(user => {
+        html += `
+          <tr>
+            <td>${user.email}</td>
+            <td>${user.name}</td>
+            <td><span class="badge bg-primary">${getRoleLabel(user.role)}</span></td>
+            <td>${user.department || '-'}</td>
+            <td><span class="badge ${user.status === 'aktif' ? 'bg-success' : 'bg-secondary'}">${user.status}</span></td>
+            <td>${user.lastLogin || '-'}</td>
+            <td>
+              <div class="btn-group btn-group-sm">
+                <button class="btn btn-outline-warning" onclick="editUser('${user.id}')">
+                  <i class="bi bi-pencil"></i>
+                </button>
+                <button class="btn btn-outline-danger" onclick="deleteUser('${user.id}')">
+                  <i class="bi bi-trash"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+        `;
+      });
+      
+      tbody.innerHTML = html;
+    }
+
+    function showAddUserModal() {
+      document.getElementById('userModalTitle').textContent = 'Tambah User';
+      document.getElementById('userForm').reset();
+      document.getElementById('userId').value = '';
+      new bootstrap.Modal(document.getElementById('userModal')).show();
+    }
+
+    function editUser(id) {
+      // Load user data and show modal
+      google.script.run
+        .withSuccessHandler(function(response) {
+          if (response.success) {
+            const user = response.data.users.find(u => u.id === id);
+            if (user) {
+              document.getElementById('userModalTitle').textContent = 'Edit User';
+              document.getElementById('userId').value = user.id;
+              document.getElementById('userEmailInput').value = user.email;
+              document.getElementById('userName').value = user.name;
+              document.getElementById('userRoleInput').value = user.role;
+              document.getElementById('userDepartment').value = user.department || '';
+              new bootstrap.Modal(document.getElementById('userModal')).show();
+            }
+          }
+        })
+        .withFailureHandler(function(error) {
+          console.error('Error loading user:', error);
+        })
+        .getUsers();
+    }
+
+    function saveUser() {
+      const data = {
+        id: document.getElementById('userId').value,
+        email: document.getElementById('userEmailInput').value,
+        name: document.getElementById('userName').value,
+        role: document.getElementById('userRoleInput').value,
+        department: document.getElementById('userDepartment').value
+      };
+      
+      if (!data.email || !data.name || !data.role) {
+        alert('Harap isi semua field yang wajib diisi');
+        return;
+      }
+      
+      const action = data.id ? 'updateUser' : 'addUser';
+      
+      google.script.run
+        .withSuccessHandler(function(response) {
+          if (response.success) {
+            bootstrap.Modal.getInstance(document.getElementById('userModal')).hide();
+            loadUsers();
+            alert(response.message);
+          } else {
+            alert('Error: ' + response.message);
+          }
+        })
+        .withFailureHandler(function(error) {
+          console.error('Error saving user:', error);
+        })[action](data);
+    }
+
+    function deleteUser(id) {
+      if (!confirm('Yakin ingin menonaktifkan user ini?')) return;
+      
+      google.script.run
+        .withSuccessHandler(function(response) {
+          if (response.success) {
+            loadUsers();
+            alert(response.message);
+          } else {
+            alert('Error: ' + response.message);
+          }
+        })
+        .withFailureHandler(function(error) {
+          console.error('Error deleting user:', error);
+        })
+        .deleteUser(id);
+    }
+
+    // ============================================================
+    // AUDIT LOG
+    // ============================================================
+
+    function loadAuditLog() {
+      const data = {
+        module: document.getElementById('auditModule').value,
+        startDate: document.getElementById('auditStartDate').value,
+        endDate: document.getElementById('auditEndDate').value
+      };
+      
+      google.script.run
+        .withSuccessHandler(function(response) {
+          if (response.success) {
+            renderAuditTable(response.data.logs);
+          }
+        })
+        .withFailureHandler(function(error) {
+          console.error('Error loading audit log:', error);
+        })
+        .getAuditLog(data);
+    }
+
+    function renderAuditTable(logs) {
+      const tbody = document.getElementById('auditTableBody');
+      
+      let html = '';
+      logs.forEach(log => {
+        const actionBadge = getActionBadge(log.action);
+        
+        html += `
+          <tr>
+            <td><small>${new Date(log.timestamp).toLocaleString('id-ID')}</small></td>
+            <td><small>${log.user}</small></td>
+            <td>${actionBadge}</td>
+            <td>${log.module}</td>
+            <td><code>${log.employeeId || '-'}</code></td>
+            <td>${log.field || '-'}</td>
+            <td><small class="text-muted">${log.oldValue || '-'}</small></td>
+            <td><small>${log.newValue || '-'}</small></td>
+          </tr>
+        `;
+      });
+      
+      tbody.innerHTML = html || '<tr><td colspan="8" class="text-center text-muted">Tidak ada data</td></tr>';
+    }
+
+    function getActionBadge(action) {
+      const badges = {
+        'ADD': '<span class="badge bg-success">Tambah</span>',
+        'EDIT': '<span class="badge bg-warning">Edit</span>',
+        'DELETE': '<span class="badge bg-danger">Hapus</span>',
+        'IMPORT': '<span class="badge bg-info">Import</span>',
+        'EXPORT': '<span class="badge bg-primary">Export</span>',
+        'LOGIN_SUCCESS': '<span class="badge bg-success">Login</span>',
+        'LOGIN_FAILED': '<span class="badge bg-danger">Login Gagal</span>'
+      };
+      return badges[action] || action;
+    }
+
+    // ============================================================
+    // IMPORT
+    // ============================================================
+
+    function importData() {
+      if (!confirm('Yakin ingin import data dari spreadsheet sumber? Data yang sudah ada tidak akan terduplikasi.')) return;
+      
+      document.getElementById('btnImport').disabled = true;
+      document.getElementById('importProgress').style.display = 'block';
+      document.getElementById('importResult').style.display = 'none';
+      
+      let progress = 0;
+      const progressBar = document.getElementById('importProgressBar');
+      const statusEl = document.getElementById('importStatus');
+      
+      const progressInterval = setInterval(() => {
+        progress += Math.random() * 15;
+        if (progress > 90) progress = 90;
+        progressBar.style.width = progress + '%';
+      }, 500);
+      
+      google.script.run
+        .withSuccessHandler(function(response) {
+          clearInterval(progressInterval);
+          progressBar.style.width = '100%';
+          statusEl.textContent = 'Selesai!';
+          
+          document.getElementById('importResult').style.display = 'block';
+          const alertEl = document.getElementById('importResultAlert');
+          
+          if (response.success) {
+            alertEl.className = 'alert alert-success';
+            alertEl.innerHTML = `
+              <strong>Import berhasil!</strong><br>
+              Data yang diimport: ${response.data.imported}<br>
+              Data yang dilewati: ${response.data.skipped}
+              ${response.data.errors.length > 0 ? '<br>Error: ' + response.data.errors.join('<br>') : ''}
+            `;
+          } else {
+            alertEl.className = 'alert alert-danger';
+            alertEl.textContent = 'Error: ' + response.message;
+          }
+          
+          document.getElementById('btnImport').disabled = false;
+        })
+        .withFailureHandler(function(error) {
+          clearInterval(progressInterval);
+          document.getElementById('importProgress').style.display = 'none';
+          document.getElementById('btnImport').disabled = false;
+          alert('Error: ' + error.message);
+        })
+        .importData();
+    }
+
+    // ============================================================
+    // SETTINGS
+    // ============================================================
+
+    function loadSettings() {
+      loadWidgetConfig();
+      document.getElementById('settingsLastUpdate').textContent = new Date().toLocaleString('id-ID');
+    }
+
+    function loadWidgetConfig() {
+      google.script.run
+        .withSuccessHandler(function(response) {
+          if (response.success) {
+            widgetConfig = response.data.config;
+            renderWidgetConfig();
+          }
+        })
+        .withFailureHandler(function(error) {
+          console.error('Error loading widget config:', error);
+        })
+        .getDashboardConfig();
+    }
+
+    function renderWidgetConfig() {
+      const container = document.getElementById('widgetConfigList');
+      
+      let html = '';
+      widgetConfig.forEach((widget, idx) => {
+        html += `
+          <div class="d-flex align-items-center justify-content-between py-2 border-bottom">
+            <div class="d-flex align-items-center">
+              <input type="checkbox" class="form-check-input me-2" 
+                ${widget.isActive ? 'checked' : ''} 
+                onchange="widgetConfig[${idx}].isActive = this.checked">
+              <span>${widget.label}</span>
+            </div>
+            <div class="d-flex align-items-center">
+              <input type="number" class="form-control form-control-sm" style="width: 60px" 
+                value="${widget.sortOrder}" 
+                onchange="widgetConfig[${idx}].sortOrder = parseInt(this.value)">
+            </div>
+          </div>
+        `;
+      });
+      
+      container.innerHTML = html;
+    }
+
+    function saveWidgetConfig() {
+      google.script.run
+        .withSuccessHandler(function(response) {
+          if (response.success) {
+            alert('Konfigurasi widget berhasil disimpan');
+          } else {
+            alert('Error: ' + response.message);
+          }
+        })
+        .withFailureHandler(function(error) {
+          console.error('Error saving widget config:', error);
+        })
+        .updateDashboardConfig({ config: widgetConfig });
+    }
+
+    // ============================================================
+    // INITIALIZATION
+    // ============================================================
+
+    // Check if user is already logged in
+    document.addEventListener('DOMContentLoaded', function() {
+      // Try to auto-login
+      google.script.run
+        .withSuccessHandler(function(response) {
+          if (response.success && response.data) {
+            currentUser = response.data.user;
+            showApp();
+          }
+        })
+        .withFailureHandler(function(error) {
+          // Silent fail - show login page
+        })
+        .handleLogin({ email: '' });
+    });
+  </script>
+  <style>
+    .step-indicator {
+      padding: 8px 16px;
+      margin: 0 4px;
+      background: #e2e8f0;
+      border-radius: 20px;
+      font-size: 13px;
+      color: #718096;
+    }
+    
+    .step-indicator.active {
+      background: var(--accent-color);
+      color: white;
+    }
+    
+    .form-step {
+      display: none;
+    }
+    
+    .form-step.active {
+      display: block;
+    }
+  </style>
+</body>
+</html>
