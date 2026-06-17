@@ -63,11 +63,13 @@ Aplikasi ini menggantikan pengelolaan data karyawan yang saat ini dilakukan seca
 
 ### Status Kepegawaian (dari data aktual)
 
-| Status | Keterangan |
-|--------|------------|
-| **Tetap** | Karyawan permanen |
-| **Kontrak** | Karyawan dengan kontrak waktu tertentu |
-| **Relawan** | Relawan aktif (non-payroll) |
+| Status | Gaji/Honorarium | Tunjangan (Kesehatan, Transport, dll.) | Kontrak Tertulis |
+|--------|:-:|:-:|:-:|
+| **Tetap** | ✅ | ✅ Penuh | ✅ |
+| **Kontrak** | ✅ | ✅ Penuh | ✅ (waktu tertentu) |
+| **Relawan** | ✅ | ❌ Tidak ada | Opsional |
+
+> **Catatan penting:** Relawan di LAZWaf Al Azhar **bukan sukarelawan tanpa bayaran**. Mereka tetap menerima gaji/honorarium, tetapi **tidak mendapatkan komponen tunjangan** apa pun (kesehatan, transport, makan, BPJS, dll.). Perbedaan dengan Kontrak/Tetap **hanya pada paket tunjangan**, bukan pada status berbayar/tidak berbayar. Ini perlu tercermin di sistem agar laporan payroll dan kepegawaian akurat.
 
 ### Sistem Level Jabatan (dari data aktual)
 
@@ -216,7 +218,7 @@ Semua widget menampilkan angka dan dapat dikonfigurasi di **Master Akses** oleh 
 | `TOTAL_AKTIF` | Total Karyawan Aktif | COUNT(status = aktif) |
 | `TOTAL_TETAP` | Karyawan Tetap | COUNT(employment_status = 'Tetap') |
 | `TOTAL_KONTRAK` | Karyawan Kontrak | COUNT(employment_status = 'Kontrak') |
-| `TOTAL_RELAWAN` | Relawan | COUNT(employment_status = 'Relawan') |
+| `TOTAL_RELAWAN` | Relawan (Berbayar, Tanpa Tunjangan) | COUNT(employment_status = 'Relawan') |
 | `JK_PRIA` | Laki-Laki | COUNT(gender = 'L') |
 | `JK_WANITA` | Perempuan | COUNT(gender = 'P') |
 | `PER_DIVISI` | Per Divisi | Tabel: Nama Divisi \| Angka |
@@ -330,6 +332,7 @@ Posisi Saat Ini*  : [text]
 Departemen*       : [dropdown: Sekretariat | Keuangan | LAZ Al Azhar | Fundraising | Program | ...]
 Unit*             : [dropdown: dinamis berdasarkan Departemen]
 Status Kepegawaian*: [dropdown: Tetap | Kontrak | Relawan]
+// Catatan UI: tampilkan tooltip "Relawan: berbayar tanpa tunjangan"
 Level*            : [dropdown: 5A | 5C | 4A | 4B | 4C | 3A | 3B | 3C | 2A | 2B | 2C | 1 | 1C]
 Job Level*        : [dropdown: Kepala Divisi | Manager | Koordinator | Staf | Non Staf | Relawan]
 Tanggal Masuk*    : [date]
@@ -383,7 +386,7 @@ Anak 2 - Nama     : [text]   ← tambah baris dinamis (maks. 10 anak)
 | Posisi Saat Ini | disingkat jika terlalu panjang |
 | Departemen | |
 | Unit | |
-| Status | badge warna: Tetap (hijau) / Kontrak (kuning) / Relawan (biru) |
+| Status | badge warna: Tetap (hijau) / Kontrak (kuning) / Relawan (abu-abu) — ketiganya berbayar, Relawan tanpa tunjangan |
 | Level | |
 | Masa Kerja | "16 th 5 bl" (dari kolom O, P) |
 | Aksi | [👁 Detail] [✏ Edit] [⏸ Nonaktifkan] |
@@ -485,7 +488,7 @@ Karena data sumber sudah ada di Google Sheets, fitur import sangat prioritas:
 - Normalisasi otomatis:
   - Format tanggal: `8/21/1977`, `3 Jul 2007`, `13/01/1982` → format standar `YYYY-MM-DD`
   - Gender: `L` → `Laki-laki`, `P` → `Perempuan`
-  - Status: `Tetap`, `Kontrak`, `Relawan`
+  - Status: `Tetap`, `Kontrak`, `Relawan` (ketiganya berbayar — label ditampilkan apa adanya tanpa relabeling)
 - Setelah disetujui, data dimasukkan ke sheet `pegawai` dan career path ke sheet `career_history`
 
 ### 11.2 Export & Laporan
